@@ -1,0 +1,48 @@
+services:
+  dynamodb-volume-init:
+    image: amazon/dynamodb-local:latest
+    user: root
+    volumes:
+      - dynamodb-data:/home/dynamodblocal/data
+    entrypoint:
+      - /bin/sh
+      - -ec
+      - chown -R dynamodblocal:dynamodblocal /home/dynamodblocal/data
+
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    working_dir: /home/dynamodblocal
+    depends_on:
+      dynamodb-volume-init:
+        condition: service_completed_successfully
+    ports:
+      - "8000:8000"
+    volumes:
+      - dynamodb-data:/home/dynamodblocal/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          curl --silent --output /dev/null --write-out '%{http_code}'
+          http://localhost:8000/ | grep -Eq '^[1-5][0-9][0-9]'
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  dynamodb-init:
+    image: amazon/aws-cli:latest
+    depends_on:
+      dynamodb-local:
+        condition: service_healthy
+    environment:
+      AWS_ACCESS_KEY_ID: local
+      AWS_SECRET_ACCESS_KEY: local
+      AWS_DEFAULT_REGION: ap-northeast-1
+      DYNAMODB_ENDPOINT_URL: http://dynamodb-local:8000
+    volumes:
+      - ./scripts/init_dynamodb.sh:/scripts/init_dynamodb.sh:ro
+    entrypoint: ["/bin/sh", "/scripts/init_dynamodb.sh"]
+
+volumes:
+  dynamodb-data:

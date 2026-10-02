@@ -2,8 +2,10 @@
 
 from datetime import UTC, datetime
 
+from ..domain import Clock
 
-class UtcClock:
+
+class UtcClock(Clock):
     """UTC の現在時刻を取得する。"""
 
     def now(self) -> datetime:

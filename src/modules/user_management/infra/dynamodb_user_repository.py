@@ -3,12 +3,11 @@
 from collections.abc import Mapping
 from datetime import datetime
 from typing import Any, cast
-from uuid import UUID
 
 from boto3.dynamodb.conditions import Attr
 from botocore.exceptions import BotoCoreError, ClientError
 
-from ...shared.infra import UtcClock
+from ...shared.domain import Clock
 from ...shared.infra.dynamodb import DynamoDBContext
 from ..application import (
     UserAlreadyExistsError,
@@ -16,7 +15,8 @@ from ..application import (
     UserRepository,
     UserRepositoryError,
 )
-from ..domain import User, UserStatus
+from ..domain import User, UserIdVo, UserStatus
+from ..domain.entities.value_objects import AccountNameVo
 
 
 class DynamoDBUserRepository(UserRepository):
@@ -27,18 +27,18 @@ class DynamoDBUserRepository(UserRepository):
         context: DynamoDBContext,
         *,
         table_name: str,
-        clock: UtcClock,
+        clock: Clock,
     ) -> None:
         """Initialize the repository with a DynamoDB context."""
         resource = cast(Any, context.resource)
         self._table: Any = resource.Table(table_name)
         self._clock = clock
 
-    def get_user(self, user_id: UUID) -> User | None:
+    def get_user(self, user_id: UserIdVo) -> User | None:
         """Retrieve a user by ID, or return ``None`` when it does not exist."""
         try:
             response = self._table.get_item(
-                Key={"user_id": str(user_id)},
+                Key={"user_id": user_id.value},
                 ConsistentRead=True,
             )
         except (BotoCoreError, ClientError) as error:
@@ -63,27 +63,23 @@ class DynamoDBUserRepository(UserRepository):
         except (BotoCoreError, ClientError) as error:
             raise UserRepositoryError from error
 
-    def disable_user(self, user_id: UUID) -> None:
-        """Disable a user and update its timestamp."""
-        self._update_status(user_id, UserStatus.DISABLED)
-
-    def enable_user(self, user_id: UUID) -> None:
-        """Enable a user and update its timestamp."""
-        self._update_status(user_id, UserStatus.ENABLED)
-
-    def _update_status(self, user_id: UUID, status: UserStatus) -> None:
-        """Update a user's status without creating a missing user."""
+    def update_user(self, user: User) -> None:
+        """Persist domain changes without creating a missing user."""
         conditional_check_failed = (
             self._table.meta.client.exceptions.ConditionalCheckFailedException
         )
         try:
             self._table.update_item(
-                Key={"user_id": str(user_id)},
-                UpdateExpression="SET #status = :status, updated_at = :updated_at",
+                Key={"user_id": user.user_id.value},
+                UpdateExpression=(
+                    "SET account_name = :account_name, "
+                    "#status = :status, updated_at = :updated_at"
+                ),
                 ExpressionAttributeNames={"#status": "status"},
                 ExpressionAttributeValues={
-                    ":status": status.value,
-                    ":updated_at": self._clock.now().isoformat(),
+                    ":account_name": user.account_name.value,
+                    ":status": user.status.value,
+                    ":updated_at": user.updated_at.isoformat(),
                 },
                 ConditionExpression=Attr("user_id").exists(),
             )
@@ -96,20 +92,20 @@ class DynamoDBUserRepository(UserRepository):
     def _to_item(user: User) -> dict[str, str]:
         """Convert a user entity to a DynamoDB item."""
         return {
-            "user_id": str(user.user_id),
-            "account_name": user.account_name,
+            "user_id": user.user_id.value,
+            "account_name": user.account_name.value,
             "created_at": user.created_at.isoformat(),
             "updated_at": user.updated_at.isoformat(),
             "status": user.status.value,
         }
 
-    @staticmethod
-    def _to_user(item: Mapping[str, object]) -> User:
+    def _to_user(self, item: Mapping[str, object]) -> User:
         """Convert a DynamoDB item to a user entity."""
         return User(
-            user_id=UUID(str(item["user_id"])),
-            account_name=str(item["account_name"]),
+            user_id=UserIdVo(cast(str, item["user_id"])),
+            account_name=AccountNameVo(str(item["account_name"])),
             created_at=datetime.fromisoformat(str(item["created_at"])),
             updated_at=datetime.fromisoformat(str(item["updated_at"])),
             status=UserStatus(str(item["status"])),
+            clock=self._clock,
         )

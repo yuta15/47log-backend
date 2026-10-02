@@ -45,7 +45,7 @@ def repository(context: DynamoDBContext, table_name: str) -> DynamoDBVisitReposi
 def visit() -> Visit:
     """固定の訪問記録を提供する。"""
     return Visit(
-        user_id=UUID("f0a6ba9f-fdc5-453d-b7bd-2a1f12c3f3fb"),
+        user_id="109876543210987654321",
         visit_id=UUID("019994f0-0000-7000-8000-000000000001"),
         prefecture=Prefecture.HOKKAIDO,
         created_at=datetime(2026, 9, 29, 13, 39, 42, tzinfo=UTC),
@@ -61,14 +61,14 @@ def second_visit(visit: Visit) -> Visit:
 @pytest.fixture
 def other_user_visit(visit: Visit) -> Visit:
     """別ユーザーに属する同じ ID の訪問記録を提供する。"""
-    return replace(visit, user_id=UUID("cbf42151-a578-4b22-a55c-0f5ab37d8c5f"))
+    return replace(visit, user_id="109876543210987654322")
 
 
 @pytest.fixture(autouse=True)
 def clean_visits(table, visit: Visit, second_visit: Visit, other_user_visit: Visit):
     """テストが使用する複合キーだけを実行前後に削除する。"""
     keys = [
-        {"user_id": str(record.user_id), "visit_id": str(record.visit_id)}
+        {"user_id": record.user_id, "visit_id": str(record.visit_id)}
         for record in (visit, second_visit, other_user_visit)
     ]
     for key in keys:

@@ -2,21 +2,21 @@
 
 from datetime import UTC, datetime
 from unittest.mock import Mock
-from uuid import UUID
 
 import pytest
 
-from src.modules.shared.infra import UtcClock
-from src.modules.user_management.domain import User, UserStatus
+from src.modules.shared.domain import Clock
+from src.modules.user_management.domain import User, UserIdVo, UserStatus
+from src.modules.user_management.domain.entities.value_objects import AccountNameVo
 from src.modules.user_management.infra.dynamodb_user_repository import (
     DynamoDBUserRepository,
 )
 
 
 @pytest.fixture
-def user_id() -> UUID:
+def user_id() -> UserIdVo:
     """固定のユーザー ID を提供する。"""
-    return UUID("ed9affb2-b079-4be9-9cdd-2f0c77f387ca")
+    return UserIdVo("109876543210987654321")
 
 
 @pytest.fixture
@@ -61,8 +61,8 @@ def context(table: Mock) -> Mock:
 
 @pytest.fixture
 def clock(updated_at: datetime) -> Mock:
-    """固定日時を返す UtcClock の Mock を提供する。"""
-    clock = Mock(spec=UtcClock)
+    """固定日時を返す Clock の Mock を提供する。"""
+    clock = Mock(spec=Clock)
     clock.now.return_value = updated_at
     return clock
 
@@ -78,12 +78,13 @@ def repository(context: Mock, clock: Mock) -> DynamoDBUserRepository:
 
 
 @pytest.fixture
-def user(user_id: UUID, created_at: datetime) -> User:
+def user(user_id: UserIdVo, created_at: datetime, clock: Mock) -> User:
     """有効なユーザーを提供する。"""
     return User(
         user_id=user_id,
-        account_name="dummy-account",
+        account_name=AccountNameVo("dummy-account"),
         created_at=created_at,
         updated_at=created_at,
         status=UserStatus.ENABLED,
+        clock=clock,
     )

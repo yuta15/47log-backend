@@ -1,4 +1,4 @@
-.PHONY: check complexity dynamodb-down dynamodb-up format format-check imports lint test test-integration typecheck
+.PHONY: check complexity dynamodb-down dynamodb-up format format-check imports lint lint-fix test test-integration typecheck
 
 lint:
 	uv run ruff check .

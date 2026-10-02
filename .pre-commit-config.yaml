@@ -5,26 +5,31 @@ repos:
     hooks:
       - id: ruff-lint
         name: ruff lint
-        entry: uv run ruff check .
+        entry: make lint
         language: system
         pass_filenames: false
       - id: ruff-format
         name: ruff format
-        entry: uv run ruff format --check .
+        entry: make format-check
         language: system
         pass_filenames: false
       - id: pyright
         name: pyright
-        entry: uv run pyright
+        entry: make typecheck
         language: system
         pass_filenames: false
       - id: import-linter
         name: import-linter
-        entry: uv run lint-imports
+        entry: make imports
+        language: system
+        pass_filenames: false
+      - id: complexity
+        name: complexity
+        entry: make complexity
         language: system
         pass_filenames: false
       - id: pytest
         name: pytest
-        entry: uv run pytest
+        entry: make test
         language: system
         pass_filenames: false

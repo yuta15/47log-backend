@@ -10,6 +10,9 @@
 make check
 ```
 
+pre-commit も Makefile の各ターゲットを呼び出し、`make check` と同じ項目を検証します。
+各チェックを個別の hook に分けているため、失敗した項目を確認できます。
+
 | コマンド | 説明 |
 | --- | --- |
 | `make lint` | Ruff による lint チェックを実行します。 |

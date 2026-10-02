@@ -23,7 +23,7 @@ def test_list_visits_success_returns_mapped_visits(
     """DynamoDB が指定ユーザーの訪問記録を返した場合の変換を確認する。
 
     list_visits の戻り値が、取得した記録と同じ値を持つ Visit のリストになること。
-    各 Visit の user_id と visit_id が UUID、created_at が datetime になること。
+    各 Visit の user_id が str、visit_id が UUID、created_at が datetime になること。
     prefecture_id が 1 または 47 の場合、prefecture が対応する Prefecture になること。
     Query の検索条件が指定した user_id との一致条件で、取得順が昇順になること。
     """
@@ -32,7 +32,7 @@ def test_list_visits_success_returns_mapped_visits(
     table.query.return_value = {
         "Items": [
             {
-                "user_id": str(visit.user_id),
+                "user_id": visit.user_id,
                 "visit_id": str(visit.visit_id),
                 "prefecture_id": Decimal(prefecture_id),
                 "created_at": visit.created_at.isoformat(),
@@ -48,13 +48,13 @@ def test_list_visits_success_returns_mapped_visits(
     assert actual_visits[0].prefecture is expected_visit.prefecture
     table.query.assert_called_once()
     arguments = table.query.call_args.kwargs
-    assert arguments["KeyConditionExpression"] == Key("user_id").eq(str(visit.user_id))
+    assert arguments["KeyConditionExpression"] == Key("user_id").eq(visit.user_id)
     assert arguments.get("ScanIndexForward", True) is True
 
 
 @pytest.mark.parametrize("response", [{}, {"Items": []}])
 def test_list_visits_success_returns_empty_list_when_no_visits_exist(
-    repository, table, user_id: UUID, response: dict
+    repository, table, user_id: str, response: dict
 ) -> None:
     """DynamoDB の応答に Items がない場合、または Items が空の場合を確認する。
 
@@ -80,7 +80,7 @@ def test_list_visits_success_reads_all_pages(repository, table, visit: Visit) ->
     """
     # Arrange
     second_visit = replace(visit, visit_id=UUID("019994f0-0000-7000-8000-000000000002"))
-    last_key = {"user_id": str(visit.user_id), "visit_id": str(visit.visit_id)}
+    last_key = {"user_id": visit.user_id, "visit_id": str(visit.visit_id)}
     table.query.side_effect = [
         {
             "Items": [
@@ -95,7 +95,7 @@ def test_list_visits_success_reads_all_pages(repository, table, visit: Visit) ->
         {
             "Items": [
                 {
-                    "user_id": str(second_visit.user_id),
+                    "user_id": second_visit.user_id,
                     "visit_id": str(second_visit.visit_id),
                     "prefecture_id": Decimal(second_visit.prefecture.value),
                     "created_at": second_visit.created_at.isoformat(),
@@ -127,7 +127,7 @@ def test_create_visit_success_writes_a_mapped_item(
 ) -> None:
     """create_visit に Visit を渡した場合の書込み内容を確認する。
 
-    DynamoDB に渡す Item の user_id と visit_id が UUID の文字列になること。
+    Item の user_id は元の文字列を保持し、visit_id は UUID の文字列になること。
     Item の created_at が Visit の作成日時を表す ISO 8601 形式の文字列になること。
     Visit の prefecture が北海道の場合、Item の prefecture_id が 1 になること。
     Visit の prefecture が沖縄の場合、Item の prefecture_id が 47 になること。
@@ -141,7 +141,7 @@ def test_create_visit_success_writes_a_mapped_item(
     # Assert
     table.put_item.assert_called_once()
     assert table.put_item.call_args.kwargs["Item"] == {
-        "user_id": str(visit.user_id),
+        "user_id": visit.user_id,
         "visit_id": str(visit.visit_id),
         "prefecture_id": prefecture_id,
         "created_at": visit.created_at.isoformat(),
@@ -171,7 +171,7 @@ def test_delete_visit_success_deletes_by_composite_key(
 ) -> None:
     """delete_visit に user_id と visit_id を渡した場合の削除キーを確認する。
 
-    DynamoDB に渡す Key の user_id と visit_id が、指定した UUID の文字列になること。
+    Key の user_id は元の文字列を保持し、visit_id は指定した UUID の文字列になること。
     """
     # Act
     repository.delete_visit(visit.user_id, visit.visit_id)
@@ -179,7 +179,7 @@ def test_delete_visit_success_deletes_by_composite_key(
     # Assert
     table.delete_item.assert_called_once()
     assert table.delete_item.call_args.kwargs["Key"] == {
-        "user_id": str(visit.user_id),
+        "user_id": visit.user_id,
         "visit_id": str(visit.visit_id),
     }
 

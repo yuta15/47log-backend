@@ -13,9 +13,9 @@ from src.modules.visit_management.infra.dynamodb_visit_repository import (
 
 
 @pytest.fixture
-def user_id() -> UUID:
+def user_id() -> str:
     """固定のユーザー ID を提供する。"""
-    return UUID("f0a6ba9f-fdc5-453d-b7bd-2a1f12c3f3fb")
+    return "109876543210987654321"
 
 
 @pytest.fixture
@@ -25,7 +25,7 @@ def created_at() -> datetime:
 
 
 @pytest.fixture
-def visit(user_id: UUID, created_at: datetime) -> Visit:
+def visit(user_id: str, created_at: datetime) -> Visit:
     """固定の訪問記録を提供する。"""
     return Visit(
         user_id=user_id,

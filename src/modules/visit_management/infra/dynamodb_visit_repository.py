@@ -26,10 +26,10 @@ class DynamoDBVisitRepository(VisitRepository):
         resource = cast(Any, context.resource)
         self._table: Any = resource.Table(table_name)
 
-    def list_visits(self, user_id: UUID) -> list[Visit]:
+    def list_visits(self, user_id: str) -> list[Visit]:
         """指定ユーザーの全訪問記録を visit_id の昇順で返す。"""
         arguments: dict[str, Any] = {
-            "KeyConditionExpression": Key("user_id").eq(str(user_id)),
+            "KeyConditionExpression": Key("user_id").eq(user_id),
             "ScanIndexForward": True,
             "ConsistentRead": True,
         }
@@ -63,14 +63,14 @@ class DynamoDBVisitRepository(VisitRepository):
         except (BotoCoreError, ClientError) as error:
             raise VisitRepositoryError from error
 
-    def delete_visit(self, user_id: UUID, visit_id: UUID) -> None:
+    def delete_visit(self, user_id: str, visit_id: UUID) -> None:
         """指定した複合キーの訪問記録を削除し、不在の場合は例外を送出する。"""
         conditional_check_failed = (
             self._table.meta.client.exceptions.ConditionalCheckFailedException
         )
         try:
             self._table.delete_item(
-                Key={"user_id": str(user_id), "visit_id": str(visit_id)},
+                Key={"user_id": user_id, "visit_id": str(visit_id)},
                 ConditionExpression=Attr("user_id").exists()
                 & Attr("visit_id").exists(),
             )
@@ -83,7 +83,7 @@ class DynamoDBVisitRepository(VisitRepository):
     def _to_item(visit: Visit) -> dict[str, str | int]:
         """Visit の各属性を DynamoDB に保存する値に変換する。"""
         return {
-            "user_id": str(visit.user_id),
+            "user_id": visit.user_id,
             "visit_id": str(visit.visit_id),
             "prefecture_id": visit.prefecture.value,
             "created_at": visit.created_at.isoformat(),
@@ -91,9 +91,9 @@ class DynamoDBVisitRepository(VisitRepository):
 
     @staticmethod
     def _to_visit(item: Mapping[str, Any]) -> Visit:
-        """DynamoDB の各属性を UUID・Prefecture・datetime に変換して Visit を返す。"""
+        """user_id の文字列を保持し、他の属性を変換して Visit を返す。"""
         return Visit(
-            user_id=UUID(str(item["user_id"])),
+            user_id=item["user_id"],
             visit_id=UUID(str(item["visit_id"])),
             prefecture=Prefecture(item["prefecture_id"]),
             created_at=datetime.fromisoformat(str(item["created_at"])),

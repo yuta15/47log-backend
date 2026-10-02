@@ -37,7 +37,10 @@ class DynamoDBUserRepository(UserRepository):
     def get_user(self, user_id: UUID) -> User | None:
         """Retrieve a user by ID, or return ``None`` when it does not exist."""
         try:
-            response = self._table.get_item(Key={"user_id": str(user_id)})
+            response = self._table.get_item(
+                Key={"user_id": str(user_id)},
+                ConsistentRead=True,
+            )
         except (BotoCoreError, ClientError) as error:
             raise UserRepositoryError from error
         item = response.get("Item")

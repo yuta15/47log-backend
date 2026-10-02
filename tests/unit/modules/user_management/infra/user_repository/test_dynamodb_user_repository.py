@@ -34,6 +34,10 @@ def test_get_user_success_returns_mapped_user(
 
     # Assert
     assert actual_user == user
+    table.get_item.assert_called_once_with(
+        Key={"user_id": str(user_id)},
+        ConsistentRead=True,
+    )
 
 
 def test_get_user_success_returns_none_when_item_does_not_exist(

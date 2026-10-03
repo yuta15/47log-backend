@@ -2,6 +2,7 @@
 
 from .activate_user_usecase import ActivateUserUsecase
 from .create_user_usecase import CreateUserUsecase
+from .deactivate_user_usecase import DeactivateUserUsecase
 from .get_current_user_status_usecase import (
     CurrentUserStatus,
     GetCurrentUserStatusOutput,
@@ -13,6 +14,7 @@ __all__ = [
     "ActivateUserUsecase",
     "CreateUserUsecase",
     "CurrentUserStatus",
+    "DeactivateUserUsecase",
     "GetCurrentUserOutput",
     "GetCurrentUserStatusOutput",
     "GetCurrentUserStatusUsecase",

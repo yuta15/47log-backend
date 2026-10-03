@@ -10,15 +10,20 @@ from src.modules.shared.infra.dynamodb import DynamoDBContext, DynamoDBSettings
 
 
 @pytest.fixture
-def stored_user(monkeypatch: pytest.MonkeyPatch) -> Iterator[dict[str, str]]:
-    """DynamoDB Local に有効ユーザーを登録し終了後に削除する。"""
+def table(monkeypatch: pytest.MonkeyPatch):
+    """DynamoDB Local の users テーブルを提供する。"""
     endpoint_url = os.environ.get("DYNAMODB_ENDPOINT_URL", "http://localhost:8000")
     monkeypatch.setenv("AWS_ACCESS_KEY_ID", "local")
     monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "local")
     monkeypatch.setenv("AWS_REGION", "ap-northeast-1")
     monkeypatch.setenv("DYNAMODB_ENDPOINT_URL", endpoint_url)
     context = DynamoDBContext(DynamoDBSettings())
-    table = context.resource.Table(os.environ.get("USERS_TABLE_NAME", "users_table"))
+    return context.resource.Table(os.environ.get("USERS_TABLE_NAME", "users_table"))
+
+
+@pytest.fixture
+def stored_user(table) -> Iterator[dict[str, str]]:
+    """DynamoDB Local に有効ユーザーを登録し終了後に削除する。"""
     item = {
         "user_id": "endpoint-integration-user",
         "account_name": "dummy-account",
@@ -32,6 +37,21 @@ def stored_user(monkeypatch: pytest.MonkeyPatch) -> Iterator[dict[str, str]]:
         yield item
     finally:
         dependencies._get_usecase.cache_clear()
+        table.delete_item(Key={"user_id": item["user_id"]})
+
+
+@pytest.fixture
+def other_user(table, stored_user: dict[str, str]) -> Iterator[dict[str, str]]:
+    """取得対象を区別できる別ユーザーを登録し終了後に削除する。"""
+    item = {
+        **stored_user,
+        "user_id": "endpoint-integration-other-user",
+        "account_name": "other-account",
+    }
+    try:
+        table.put_item(Item=item)
+        yield item
+    finally:
         table.delete_item(Key={"user_id": item["user_id"]})
 
 

@@ -33,6 +33,10 @@ def test_get_auth_claims_success_returns_subject() -> None:
         {"authorizer": None},
         {"authorizer": {}},
         {"authorizer": {"jwt": None}},
+        {"authorizer": {"jwt": {}}},
+        {"authorizer": {"jwt": 123}},
+        {"authorizer": 123},
+        {"authorizer": {"jwt": {"claims": None}}},
         {"authorizer": {"jwt": {"claims": {}}}},
         {"authorizer": {"jwt": {"claims": {"sub": 123}}}},
     ],
@@ -42,6 +46,17 @@ def test_get_auth_claims_failure_rejects_missing_or_invalid_subject(
 ) -> None:
     """sub の欠落・代表的な不正値を認証エラーに変換する。"""
     event = APIGatewayProxyEventV2({"requestContext": auth_context})
+
+    with pytest.raises(UnauthorizedError):
+        claims.get_auth_claims(event)
+
+
+@pytest.mark.parametrize("event_data", [{}, {"requestContext": None}])
+def test_get_auth_claims_failure_rejects_missing_request_context(
+    event_data: dict,
+) -> None:
+    """requestContext の欠落・null を認証エラーに変換する。"""
+    event = APIGatewayProxyEventV2(event_data)
 
     with pytest.raises(UnauthorizedError):
         claims.get_auth_claims(event)

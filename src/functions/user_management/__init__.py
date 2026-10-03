@@ -6,6 +6,9 @@ from .activate_user import (
 from .create_user import (
     endpoint as _create_user_endpoint,  # noqa: F401 -- register routes
 )
+from .deactivate_user import (
+    endpoint as _deactivate_user_endpoint,  # noqa: F401 -- register routes
+)
 from .get_current_user import (
     endpoint as _get_current_user_endpoint,  # noqa: F401 -- register routes
 )

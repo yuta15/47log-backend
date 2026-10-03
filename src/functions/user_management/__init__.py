@@ -1,5 +1,8 @@
 """Load user-management endpoints and expose their shared Router."""
 
+from .activate_user import (
+    endpoint as _activate_user_endpoint,  # noqa: F401 -- register routes
+)
 from .create_user import (
     endpoint as _create_user_endpoint,  # noqa: F401 -- register routes
 )

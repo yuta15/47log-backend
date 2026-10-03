@@ -8,6 +8,7 @@ from .exceptions import (
 )
 from .repositories.user_repository import UserRepository
 from .usecases import (
+    CreateUserUsecase,
     CurrentUserStatus,
     GetCurrentUserOutput,
     GetCurrentUserStatusOutput,
@@ -16,6 +17,7 @@ from .usecases import (
 )
 
 __all__ = [
+    "CreateUserUsecase",
     "CurrentUserStatus",
     "GetCurrentUserOutput",
     "GetCurrentUserStatusOutput",

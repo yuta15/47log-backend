@@ -2,25 +2,6 @@
 
 47log のバックエンドリポジトリです。
 
-## API
-
-API Gateway HTTP API の payload v2 を Powertools で処理します。
-Lambda のハンドラーは `src.functions.handler.handler` に設定します。
-API Gateway の統合では `payload_format_version` を `2.0` に設定し、
-認証が必要なルートに JWT Authorizer を設定します。
-
-現在のエンドポイントは `GET /users/me` です。
-JWT Authorizer の `sub` からユーザーを特定し、
-`accountName`、`createdAt`、`updatedAt`、`status` を JSON で返します。
-
-エンドポイントの処理、依存生成、レスポンスモデルは
-`src/functions/<module>/<endpoint>/` に配置します。
-モジュールの `router.py` で共有 Router を定義し、
-各 `endpoint.py` のデコレーターでメソッド・パスを登録します。
-モジュールの `__init__.py` でエンドポイントを読み込み、Router を公開します。
-`handler.py` の Resolver にモジュールの Router を登録します。
-認証情報の取得・検証は `src/functions/auth/` に配置します。
-
 ## 開発用コマンド
 
 コミット前には、次のコマンドで変更を加えない検証をまとめて実行します。

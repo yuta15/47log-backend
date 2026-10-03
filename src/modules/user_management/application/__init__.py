@@ -7,10 +7,19 @@ from .exceptions import (
     UserRepositoryError,
 )
 from .repositories.user_repository import UserRepository
-from .usecases import GetCurrentUserOutput, GetCurrentUserUsecase
+from .usecases import (
+    CurrentUserStatus,
+    GetCurrentUserOutput,
+    GetCurrentUserStatusOutput,
+    GetCurrentUserStatusUsecase,
+    GetCurrentUserUsecase,
+)
 
 __all__ = [
+    "CurrentUserStatus",
     "GetCurrentUserOutput",
+    "GetCurrentUserStatusOutput",
+    "GetCurrentUserStatusUsecase",
     "GetCurrentUserUsecase",
     "UserAlreadyExistsError",
     "UserForbiddenError",

@@ -4,9 +4,9 @@ from unittest.mock import Mock
 
 import pytest
 from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEventV2
-from src.functions.user_management.activate_user import endpoint
 
 from src.functions.auth.models import AuthClaims
+from src.functions.user_management.activate_user import endpoint
 from src.modules.user_management.application import ActivateUserUsecase
 
 

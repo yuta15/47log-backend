@@ -5,8 +5,8 @@ from collections.abc import Iterator
 from datetime import UTC, datetime
 
 import pytest
-from src.functions.user_management.activate_user import dependencies
 
+from src.functions.user_management.activate_user import dependencies
 from src.modules.shared.infra.dynamodb import DynamoDBContext, DynamoDBSettings
 from src.modules.shared.infra.utc_clock import UtcClock
 

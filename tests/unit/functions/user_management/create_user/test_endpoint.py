@@ -5,9 +5,9 @@ from unittest.mock import Mock
 
 import pytest
 from aws_lambda_powertools.event_handler.exceptions import UnauthorizedError
-from src.functions.user_management.create_user import endpoint
 
 from src.functions.auth.models import AuthClaims
+from src.functions.user_management.create_user import endpoint
 from src.modules.user_management.application import UserAlreadyExistsError
 from src.modules.user_management.domain import UserIdVo
 from src.modules.user_management.domain.entities.value_objects import AccountNameVo

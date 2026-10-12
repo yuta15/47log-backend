@@ -33,8 +33,8 @@ terraform -chdir=terraform/development plan
 terraform -chdir=terraform/development apply
 ```
 
-リポジトリルートで`make develop`を実行すると、`init`と`apply`を順に実行します。
-`apply`で表示される変更内容を確認して承認してください。
+リポジトリルートで`make develop`を実行すると、`init -lockfile=readonly`と`apply --auto-approve`を順に実行します。
+`make develop`は承認入力なしで変更を適用します。
 
 初回用イメージは再作成にも使うため、ECRに保持してください。
 更新時は新しいタグまたはdigestのイメージを用意し、CI/CD等でLambdaのコードを更新します。

@@ -54,7 +54,7 @@ Lambdaが`arm64`なら`PLATFORM=linux/arm64`を指定してください。
 
 `terraform/development`からAWSの開発環境を作成できます。stateはローカルに保存し、backend・databaseを管理します。LambdaのイメージURIは既存ECRから指定します。
 設定と初回作成の手順は[開発環境のREADME](terraform/development/README.md)を参照してください。
-`make develop`で、開発環境のTerraformの`init`と`apply`を順に実行できます。
+`make develop`で、開発環境のTerraformの`init -lockfile=readonly`と`apply --auto-approve`を順に実行し、承認入力なしで変更を適用します。
 `make develop-destroy`で、開発環境のTerraformの`init`と`destroy -auto-approve`を順に実行し、管理対象のリソースを削除します。
 
 ## productionのTerraform

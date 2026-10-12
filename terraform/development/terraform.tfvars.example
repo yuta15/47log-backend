@@ -1,0 +1,14 @@
+aws_region   = "ap-northeast-1"
+project_name = "47log-development"
+
+# 既存ECRへpush済みのdummy imageのURIに置き換える。
+backend_initial_image_uri = "123456789012.dkr.ecr.ap-northeast-1.amazonaws.com/47log-backend:initial"
+backend_architecture      = "x86_64"
+
+# 開発用Cognito User Poolの実際の値に置き換える。
+jwt_authorizer = {
+  issuer   = "https://cognito-idp.ap-northeast-1.amazonaws.com/ap-northeast-1_example"
+  audience = ["example-development-app-client-id"]
+}
+
+cors_allow_origins = ["http://localhost:3000"]

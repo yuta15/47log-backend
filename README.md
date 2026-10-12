@@ -4,31 +4,32 @@
 
 ## 開発用コマンド
 
-コミット前には、次のコマンドで変更を加えない検証をまとめて実行します。
-
-```bash
-make check
-```
-
-pre-commit も Makefile の各ターゲットを呼び出し、`make check` と同じ項目を検証します。
-各チェックを個別の hook に分けているため、失敗した項目を確認できます。
+コミット前は`make check`で検証します。pre-commitも同じ項目を実行します。
 
 | コマンド | 説明 |
 | --- | --- |
-| `make lint` | Ruff による lint チェックを実行します。 |
-| `make lint-fix` | Ruff による lint チェックを行い矯正します。 |
-| `make format` | Ruff でコードを整形します。 |
-| `make format-check` | Ruff の整形が適用済みかを確認します。 |
-| `make typecheck` | Pyright による型チェックを実行します。 |
-| `make imports` | import-linter によりアーキテクチャ上の import 契約を検証します。 |
-| `make complexity` | 循環的複雑度が 10 を超える関数を検出します。 |
-| `make test` | pytest と `src` のカバレッジ計測を実行します。 |
-| `make test-integration` | DynamoDB Local を利用する統合テストを実行します。事前に `make dynamodb-up` が必要です。 |
-| `make check` | lint、整形、型、import、複雑度、テストの検証をまとめて実行します。 |
+| `make check` | lint・整形・型・依存・複雑度・単体テストを検証 |
+| `make lint` / `make lint-fix` | Ruffのlint / 自動修正 |
+| `make format` / `make format-check` | 整形 / 整形チェック |
+| `make typecheck` | Pyrightの型チェック |
+| `make imports` | importの依存ルールを検証 |
+| `make complexity` | 循環的複雑度10超を検出 |
+| `make test` | 単体テストとカバレッジ計測 |
+| `make test-integration` | 統合テスト（DynamoDB Localの起動が必要） |
 
 ## ローカル DynamoDB
 
 | コマンド | 説明 |
 | --- | --- |
-| `make dynamodb-up` | Docker Compose で DynamoDB を起動し、初期化します。 |
-| `make dynamodb-down` | DynamoDB を停止し、Docker ボリュームを削除します。 |
+| `make dynamodb-up` | 起動・テーブル初期化 |
+| `make dynamodb-down` | 停止・データ削除 |
+
+## AWS開発環境
+
+| コマンド | 説明 |
+| --- | --- |
+| `make develop` | Terraform apply（自動承認） |
+| `make develop-destroy` | Terraform destroy（自動承認） |
+| `make develop-deploy` | イメージのビルド・ECRへpush・Lambda更新 |
+
+設定と手順は[開発環境のREADME](terraform/development/README.md)を参照してください。

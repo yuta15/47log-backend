@@ -1,0 +1,14 @@
+aws_region   = "ap-northeast-1"
+project_name = "47log-production"
+
+# 実際にpush済みのLambda対応イメージURIに置き換える。
+backend_initial_image_uri = "123456789012.dkr.ecr.ap-northeast-1.amazonaws.com/47log-backend:initial"
+backend_architecture      = "x86_64"
+
+# 47log-infraで作成したCognitoの出力値を指定する。
+jwt_authorizer = {
+  issuer   = "https://cognito-idp.ap-northeast-1.amazonaws.com/ap-northeast-1_example"
+  audience = ["example-app-client-id"]
+}
+
+cors_allow_origins = ["https://app.example.com"]
